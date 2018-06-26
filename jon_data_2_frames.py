@@ -4,8 +4,7 @@ Created on Fri Jun 15 17:41:27 2018
 
 @author: david
 """
-'''To use ffmpeg:
-    http://zulko.github.io/blog/2013/09/27/read-and-write-video-frames-in-python-using-ffmpeg/'''
+'''To use ffmpeg: http://zulko.github.io/blog/2013/09/27/read-and-write-video-frames-in-python-using-ffmpeg/'''
 
 import cv2
 print('OpenCV version: ', cv2.__version__)
