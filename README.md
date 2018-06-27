@@ -4,4 +4,6 @@ To extract frames from the video, use _jon_data_2_frames.py_
 
 To generate groundtruth frames and videos for validation, use _validation.py_
 
-Base line model(Itti): main.py
+Base line model(Itti): _main.py_
+
+Parameters: _config.py_
