@@ -86,7 +86,7 @@ if __name__ == '__main__':
     chance_CC_score = metrics.computeCC(chance_prediction, heatmap)
     # KL
     chance_KL_score = metrics.computeKL(chance_prediction, heatmap)
-    print('chance NSS, AUC, CC, KL: %f%f%f%f' 
-          %chance_NSS_score %chance_AUC_score %chance_CC_score %chance_KL_score)
+    print('chance NSS, AUC, CC, KL: %f %f %f %f' 
+          %(chance_NSS_score, chance_AUC_score, chance_CC_score, chance_KL_score))
     
     
