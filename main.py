@@ -89,4 +89,14 @@ if __name__ == '__main__':
     print('chance NSS, AUC, CC, KL: %f %f %f %f' 
           %(chance_NSS_score, chance_AUC_score, chance_CC_score, chance_KL_score))
     
+    # Save computed results
+    results_log = open(config.dir_to_save_log +"/results.txt", 'w')
+    results_log.write('frame range' + \
+                      str(config.frame_range['lower']) + ' ' + str(config.frame_range['upper']) + \
+                      '\n' + 'NSS,AUC,CC,KL' + '\n'+ \
+                      str(NSS_score) + ' ' + \
+                      str(AUC_score) + ' ' + \
+                      str(CC_score) + ' ' + \
+                      str(KL_score))
+    results_log.close()
     
