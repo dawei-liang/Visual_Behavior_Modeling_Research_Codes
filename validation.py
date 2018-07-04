@@ -65,8 +65,6 @@ if __name__ == '__main__':
             cv2.imwrite(config.dir_to_save_groundtruth + 'frame%s.jpg' % index, img)   
             # Convert Gaussian map to heatmap using 'maximum pixels'
             heatmap = np.amax(raw_Gaussian_map, axis=2)
-            # Normalize as continuous distribution
-            heatmap = heatmap_object.normalize(heatmap)
             # Save as npz            
             np.savez(config.dir_to_save_heatmap + 'heatmap%s' % index, heatmap = heatmap)
             

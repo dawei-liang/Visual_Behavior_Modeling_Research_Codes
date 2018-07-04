@@ -87,8 +87,9 @@ if __name__ == '__main__':
                 gaze_map[pos[i][1], pos[i][0]] = 1
             
             # Compute and save 
-            # Groundtruth heatmaps
-            heatmap_truth = np.load(dir_to_load_heatmap + 'heatmap' + str(index) + '.npz')['heatmap']  
+            # Load and normalize groundtruth heatmaps
+            heatmap_truth = np.load(dir_to_load_heatmap + 'heatmap' + str(index) + '.npz')['heatmap'] 
+            heatmap_truth = heatmap_object.normalize(heatmap_truth)
             # NSS
             temp_NSS = metrics.computeNSS(saliency_map, pos)
             temp_chance_NSS = metrics.computeNSS(chance_prediction, pos)
