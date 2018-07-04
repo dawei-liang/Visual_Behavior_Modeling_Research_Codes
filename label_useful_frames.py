@@ -8,9 +8,9 @@ Created on Tue Jul  3 16:31:06 2018
 import os
 import config
 import shutil
+import check_dirs
 
-
-    
+check_dirs.check_dir(config.dir_to_save_frames_in_use)
 frame_sets = [x for x in os.listdir(config.dir_to_load_frames) if x.endswith('.jpg')]   # Load frames
 print('Number of frames:', len(frame_sets))
 
