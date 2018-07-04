@@ -17,6 +17,9 @@ import check_dirs
 '''Visualize groundtruth coordinates and generate groundtruth videos/heatmaps'''
 
 if __name__ == '__main__':
+    check_dirs.check_dir(config.dir_to_save_groundtruth)
+    check_dirs.check_dir(config.dir_to_save_heatmap)
+    check_dirs.check_dir(config.dir_write_video)
     groundtruth_log = open(config.dir_to_save_log +"/log.txt", 'w')
     
     '''Import groundtruth coordinates and frame indeces from csv'''
@@ -59,19 +62,16 @@ if __name__ == '__main__':
                     cv2.circle(img, center, radius=10, color=(0,0,255), 
                                              thickness=2, lineType=8, shift=0)
             # Save plotted frames
-            check_dirs.check_dir(config.dir_to_save_groundtruth)
             cv2.imwrite(config.dir_to_save_groundtruth + 'frame%s.jpg' % index, img)   
             # Convert Gaussian map to heatmap using 'maximum pixels'
             heatmap = np.amax(raw_Gaussian_map, axis=2)
             # Normalize as continuous distribution
             heatmap = heatmap_object.normalize(heatmap)
-            # Save as npz
-            check_dirs.check_dir(config.dir_to_save_heatmap)
+            # Save as npz            
             np.savez(config.dir_to_save_heatmap + 'heatmap%s' % index, heatmap = heatmap)
             
     groundtruth_log.close()
     
     ''' Generate a groundtruth video '''
-    check_dirs.check_dir(config.dir_write_video)
     video_object = video.video(config.dir_to_load_frames_for_video, config.dir_write_video)
     video_object.to_video()
