@@ -24,6 +24,7 @@ if __name__ == '__main__':
     check_dirs.check_dir(config.dir_to_save_log)
     check_dirs.check_dir(config.dir_to_save_saliency_map)
     check_dirs.check_dir(config.dir_to_save_antisaliency_map)
+    check_dirs.check_dir(config.dir_to_save_chance_map)
     
     NSS_itti = open(config.dir_to_save_log +"/NSS_itti.txt", 'w')
     AUC_itti = open(config.dir_to_save_log +"/AUC_itti.txt", 'w')
@@ -69,7 +70,8 @@ if __name__ == '__main__':
             chance_prediction = heatmap_object.normalize(chance_prediction)
             # Save saliency/anti saliency maps
             np.savez(config.dir_to_save_saliency_map + 'saliency%s' % index, saliency = saliency_map)
-            np.savez(config.dir_to_save_antisaliency_map + 'anti%s' % index, antisaliency = anti_saliency_map)
+            np.savez(config.dir_to_save_antisaliency_map + 'antisaliency%s' % index, antisaliency = anti_saliency_map)
+            np.savez(config.dir_to_save_chance_map + 'chance%s' % index, antisaliency = anti_saliency_map)
             # Create a gaze position list and gaze map
             gaze_line = gaze[1].split(' ')[1:]   # Extract lines of gaze from the txt
             pos = []   # Gaze position list
