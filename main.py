@@ -11,6 +11,7 @@ import config
 import os
 import itti_model
 import heatmap
+import check_dirs
 
 #%%
 dir_to_load_heatmap = config.dir_to_save_heatmap
@@ -20,6 +21,7 @@ y_pos, x_pos = config.pixel['y'], config.pixel['x']
 
 
 if __name__ == '__main__':
+    check_dirs.check_dir(config.dir_to_save_log)
     NSS_itti = open(config.dir_to_save_log +"/NSS_itti.txt", 'w')
     AUC_itti = open(config.dir_to_save_log +"/AUC_itti.txt", 'w')
     CC_itti = open(config.dir_to_save_log +"/CC_itti.txt", 'w')
