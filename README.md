@@ -7,3 +7,5 @@ To generate groundtruth frames and videos for validation and groundtruth heatmap
 Base line model(Itti, chance, anti_saliency): _main.py_
 
 Parameters: _config.py_
+
+To get copies of in use frames: _label_useful_frames.py_
