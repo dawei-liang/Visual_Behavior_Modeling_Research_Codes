@@ -27,9 +27,9 @@ class itti_model:
         img_height = imgsize[0]
         sm = pySaliencyMap.pySaliencyMap(img_width, img_height)
         # computation
-        self.saliency_map = sm.SMGetSM(img)
-        self.binarized_map = sm.SMGetBinarizedSM(img)
-        self.salient_region = sm.SMGetSalientRegion(img)
+        self.saliency_map, self.anti_saliency_map = sm.SMGetSM(img)   # Modified by Dawei
+        #self.binarized_map = sm.SMGetBinarizedSM(img)
+        #self.salient_region = sm.SMGetSalientRegion(img)
         # visualize
 #    #    plt.subplot(2,2,1), plt.imshow(img, 'gray')
 #        plt.subplot(2,2,1), plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
@@ -51,11 +51,14 @@ class itti_model:
     
   
 #%%
-#for i in range(1920):
-#    for j in range(1080):
+#for i in range(1024):
+#    for j in range(576):
 #        if gaze_map[j,i]!=0:
 #            print(j,i)
 #
 #plt.figure(2)
-#plt.imshow(heatmap)
+#plt.imshow(-saliency_map)
+#a = np.uint8(255 * saliency_map)
+#b=cv2.minMaxLoc(saliency_map)
+#thresh, binarized_SM = cv2.threshold(a, thresh=0, maxval=255, type=cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         

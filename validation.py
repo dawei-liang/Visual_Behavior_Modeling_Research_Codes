@@ -18,21 +18,26 @@ import heatmap
 if __name__ == '__main__':
     groundtruth_log = open(config.dir_to_save_log +"/log.txt", 'w')
     
-    '''Import groundtruth coordinates and frame indeces'''
+    '''Import groundtruth coordinates and frame indeces from csv'''
     truth_df = pd.read_csv(config.groudtruth_file)
     norm_pos_x = truth_df['norm_pos_x'].values
     norm_pos_y = truth_df['norm_pos_y'].values
     frame_idx = truth_df['index'].values
     heatmap_object = heatmap.heatmap(config.pixel['x'], config.pixel['y'])
     
-    '''Generate and save groundturth frames/txt'''
+    '''Generate and save groundtruth frames/heatmap/txt'''
     frame_sets = [x for x in os.listdir(config.dir_to_load_frames) if x.endswith('.jpg')]   # Load frames   
     print('Number of frames:', len(frame_sets))
     
     for frame in frame_sets:
         index = int(frame.strip('frame').strip('.jpg'))   # Get loaded frame index
         # Frames to test
-        if index >= config.frame_range['lower'] and index < config.frame_range['upper']:   
+        if (index >= 4240 and index < 5308) or \
+        (index >= 5332 and index < 6363) or \
+        (index >= 6701 and index < 7778) or \
+        (index >= 7814 and index < 8917) or \
+        (index >= 9329 and index < 11444) or \
+        (index >= 11678 and index < 13857):
             groundtruth_log.write('\n' + str(index))
             print('frame:', index)               
             img = cv2.imread(config.dir_to_load_frames + frame)   # Load the frame to visualize 
@@ -53,13 +58,16 @@ if __name__ == '__main__':
                     cv2.circle(img, center, radius=10, color=(0,0,255), 
                                              thickness=2, lineType=8, shift=0)
             # Save plotted frames
-            cv2.imwrite(config.dir_to_save_valdidation + 'frame%s.jpg' % index, img)   
+            cv2.imwrite(config.dir_to_save_groundtruth + 'frame%s.jpg' % index, img)   
             # Convert Gaussian map to heatmap using 'maximum pixels'
             heatmap = np.amax(raw_Gaussian_map, axis=2)
+            # Normalize as continuous distribution
+            heatmap = heatmap_object.normalize(heatmap)
+            # Save as npz
             np.savez(config.dir_to_save_heatmap + 'heatmap%s' % index, heatmap = heatmap)
             
     groundtruth_log.close()
     
-    ''' Generate a validation video '''
+    ''' Generate a groundtruth video '''
     video_object = video.video(config.dir_to_load_frames_for_video, config.dir_write_video)
     video_object.to_video()

@@ -254,8 +254,14 @@ class pySaliencyMap:
         normalizedSM2 = normalizedSM.astype(np.float32)
         smoothedSM = cv2.bilateralFilter(normalizedSM2, 7, 3, 1.55)
         self.SM = cv2.resize(smoothedSM, (width,height), interpolation=cv2.INTER_NEAREST)
+        # Added by Dawei, to compute anti-saliency
+        anti_SMMat = -SMMat
+        normalized_antiSM = self.SMRangeNormalize(anti_SMMat)
+        normalized_antiSM2 = normalized_antiSM.astype(np.float32)
+        smoothed_antiSM = cv2.bilateralFilter(normalized_antiSM2, 7, 3, 1.55)
+        self.anti_SM = cv2.resize(smoothed_antiSM, (width,height), interpolation=cv2.INTER_NEAREST)
         # return
-        return self.SM
+        return self.SM, self.anti_SM
 
     def SMGetBinarizedSM(self, src):
         # get a saliency map
