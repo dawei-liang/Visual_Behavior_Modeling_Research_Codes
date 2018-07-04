@@ -50,12 +50,13 @@ if __name__ == '__main__':
     for frame in frame_sets:
         index = int(frame.strip('frame').strip('.jpg'))   # Get loaded frame index
         # Frames to test
-        if (index >= 4240 and index < 5308) or \
-        (index >= 5332 and index < 6363) or \
-        (index >= 6701 and index < 7778) or \
-        (index >= 7814 and index < 8917) or \
-        (index >= 9329 and index < 11444) or \
-        (index >= 11678 and index < 13857):   
+#        if (index >= 4240 and index < 5308) or \
+#        (index >= 5332 and index < 6363) or \
+#        (index >= 6701 and index < 7778) or \
+#        (index >= 7814 and index < 8917) or \
+#        (index >= 9329 and index < 11444) or \
+#        (index >= 11678 and index < 13857):  
+        if (index >= 4240 and index < 4340):
             print('frame index:', index)            
             # Generate saliency/anti_saliency map
             itti_model_object = itti_model.itti_model(dir_to_load_frames + frame)                       
@@ -63,15 +64,15 @@ if __name__ == '__main__':
             saliency_map = itti_model_object.saliency_map
             anti_saliency_map = itti_model_object.anti_saliency_map
             chance_prediction = np.random.rand(y_pos, x_pos)
+            # Save saliency/anti saliency maps
+            np.savez(config.dir_to_save_saliency_map + 'saliency%s' % index, saliency = saliency_map)
+            np.savez(config.dir_to_save_antisaliency_map + 'antisaliency%s' % index, antisaliency = anti_saliency_map)
+            np.savez(config.dir_to_save_chance_map + 'chance%s' % index, chance = chance_prediction)
             # Normalize as distribution
             heatmap_object = heatmap.heatmap(x_pos, y_pos)
             saliency_map = heatmap_object.normalize(saliency_map)
             anti_saliency_map = heatmap_object.normalize(anti_saliency_map)
             chance_prediction = heatmap_object.normalize(chance_prediction)
-            # Save saliency/anti saliency maps
-            np.savez(config.dir_to_save_saliency_map + 'saliency%s' % index, saliency = saliency_map)
-            np.savez(config.dir_to_save_antisaliency_map + 'antisaliency%s' % index, antisaliency = anti_saliency_map)
-            np.savez(config.dir_to_save_chance_map + 'chance%s' % index, antisaliency = anti_saliency_map)
             # Create a gaze position list and gaze map
             gaze_line = gaze[1].split(' ')[1:]   # Extract lines of gaze from the txt
             pos = []   # Gaze position list
