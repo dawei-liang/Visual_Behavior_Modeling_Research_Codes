@@ -50,13 +50,12 @@ if __name__ == '__main__':
     for frame in frame_sets:
         index = int(frame.strip('frame').strip('.jpg'))   # Get loaded frame index
         # Frames to test
-#        if (index >= 4240 and index < 5308) or \
-#        (index >= 5332 and index < 6363) or \
-#        (index >= 6701 and index < 7778) or \
-#        (index >= 7814 and index < 8917) or \
-#        (index >= 9329 and index < 11444) or \
-#        (index >= 11678 and index < 13857):  
-        if (index >= 4240 and index < 4340):
+        if (index >= 4240 and index < 5308) or \
+        (index >= 5332 and index < 6363) or \
+        (index >= 6701 and index < 7778) or \
+        (index >= 7814 and index < 8917) or \
+        (index >= 9329 and index < 11444) or \
+        (index >= 11678 and index < 13857):  
             print('frame index:', index)            
             # Generate saliency/anti_saliency map
             itti_model_object = itti_model.itti_model(dir_to_load_frames + frame)                       
