@@ -9,3 +9,5 @@ Base line model(Itti, chance, anti_saliency): _main.py_
 Parameters: _config.py_
 
 To get copies of in use frames: _label_useful_frames.py_
+
+To replay predictions: _replay_video.py_
