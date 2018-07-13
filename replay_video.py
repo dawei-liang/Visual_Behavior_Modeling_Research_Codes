@@ -80,7 +80,14 @@ def event_handler_func():
     
 if __name__ == "__main__":
     # Loop over ground truth frames, check overall info
-    truth_files = [x for x in os.listdir(dir_ground_truth) if x.endswith('.jpg')]            
+    truth_files = [x for x in os.listdir(dir_ground_truth) if x.endswith('.jpg')]   
+    # Sort file name by frame index
+    for i in range(len(truth_files)):
+        truth_files[i] = int(truth_files[i].strip('frame').strip('.jpg'))
+    truth_files.sort()
+    for i in range(len(truth_files)):
+        truth_files[i] = 'frame' + str(truth_files[i]) + '.jpg'
+        
     print('Number of frames:', len(truth_files))
     print ("\nYou can control the replay using keyboard. Try pressing space/up/down/left/right.") 
     print ("For all available keys, see event_handler_func() code.\n")
