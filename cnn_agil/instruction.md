@@ -1,3 +1,3 @@
 
 CNN architecture of AGIL
-main file: __CNN_saliency_agil.py__
+main file: _CNN_saliency_agil.py_
