@@ -23,7 +23,7 @@ print("Usage Training Mode: ipython main.py gamename 0 parameters")
 #AFFIX = '-image+opf_past4'
 #PREDICT_FILE_VAL = BASE_FILE_NAME.split('/')[-1] + AFFIX
 BATCH_SIZE = 50
-num_epoch = 1
+num_epoch = 10
 
 resume_model = False
 predict_mode = True
@@ -65,12 +65,14 @@ else:
     x=L.Activation('relu')(x)
     x=L.BatchNormalization()(x)
     x=L.Dropout(dropout)(x)
+    print(conv11.output_shape)
     
-#    conv12=L.Conv2D(64, (4,4), strides=2, padding='same')
-#    x = conv12(x)
-#    x=L.Activation('relu')(x)
-#    x=L.BatchNormalization()(x)
-#    x=L.Dropout(dropout)(x)
+    conv12=L.Conv2D(64, (4,4), strides=2, padding='same')
+    x = conv12(x)
+    x=L.Activation('relu')(x)
+    x=L.BatchNormalization()(x)
+    x=L.Dropout(dropout)(x)
+    print(conv12.output_shape)
 #    
 #    conv13=L.Conv2D(64, (3,3), strides=1, padding='same')
 #    x = conv13(x)
@@ -84,13 +86,14 @@ else:
 #    x=L.BatchNormalization()(x)
 #    x=L.Dropout(dropout)(x)
 #
-#    deconv12 = L.Conv2DTranspose(32, (4,4), strides=2, padding='same')
-#    x = deconv12(x)
-#    x=L.Activation('relu')(x)
-#    x=L.BatchNormalization()(x)
-#    x=L.Dropout(dropout)(x)         
+    deconv12 = L.Conv2DTranspose(32, (4,4), strides=2, padding='same')
+    x = deconv12(x)
+    print(deconv12.output_shape)
+    x=L.Activation('relu')(x)
+    x=L.BatchNormalization()(x)
+    x=L.Dropout(dropout)(x)         
 
-    deconv13 = L.Conv2DTranspose(3, (8,8), strides=4, padding='same')
+    deconv13 = L.Conv2DTranspose(1, (8,8), strides=4, padding='same')
     x = deconv13(x)
     print (deconv13.output_shape)
     x = L.Activation('relu')(x)
@@ -103,11 +106,11 @@ else:
     opt=K.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0)
     #opt=K.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
         
-    model.compile(loss=MU.my_kld, optimizer=opt, metrics=[MU.NSS])
+    model.compile(loss=MU.my_kld, optimizer=opt, metrics=[MU.my_kld])
 
 # Load training data and labels(heatmaps) 
 training_data_object = load_data_for_cnn.read_data('G:/Research2/w5/frames_in_use/',
-                                                   'G:/Research2/w5/rgb_saliency_maps/',
+                                                   'G:/Research2/w5/groundtruth_heatmap/',
                                                    576, 1024)
 training_data, training_labels = training_data_object.load_data()
 
@@ -119,7 +122,7 @@ if not predict_mode:
         validation_split=0.1,
         shuffle=True, verbose=2,
         callbacks=[K.callbacks.TensorBoard(log_dir=expr.dir),
-            K.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr = 0.00001),
+            K.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, min_lr = 0.00001),
             base_misc_utils.PrintLrCallback()])
 
     expr.save_weight_and_training_config_state(model)
@@ -128,32 +131,32 @@ if not predict_mode:
 
 # if prediction mode
 elif predict_mode: 
-    model.load_weights('G:/Research2/w6/aaa/17_pKf_dp0.1_k3s1/'+'model.hdf5')
+    model.load_weights('G:/Research2/w6/aaa/42_pKf_dp0.1_k3s1/'+'model.hdf5')
 
     print ("Evaluating model...")
-    #train_score = model.evaluate([d.train_imgs, of.train_flow], d.train_GHmap, BATCH_SIZE, 0, sample_weight=d.train_weight)
-    #print "Train loss is:  " , train_score
-    val_score = model.evaluate(training_data, training_labels, BATCH_SIZE, 0)
-    print ("Val loss is: " , val_score)
+
+    score = model.evaluate(training_data, training_labels, BATCH_SIZE, 0)
+    print ("Val loss is: " , score)
 
     print ("Predicting results...")
     train_pred = model.predict(training_data, BATCH_SIZE) 
-    val_pred = model.predict(training_data, BATCH_SIZE)
     print ("Predicted.")
 
-
-    # Uncomment this block to save predicted gaze heatmap for visualization
-    #print "Converting predicted results into png files and save..."
-    #IU.save_heatmap_png_files(d.train_fid, train_pred, TRAIN_DATASET, '../../saliency/')
-    #IU.save_heatmap_png_files(d.val_fid, val_pred, VAL_DATASET, '../../saliency/')
-    #print "Done."
 #%%
-#    print ("Writing predicted gaze heatmap (train) into the npz file...")
-#    np.savez_compressed(BASE_FILE_NAME.split('/')[-1] + '-train' + AFFIX, fid=d.train_fid, heatmap=train_pred)
-#    print ("Done. Output is:")
-#    print (" %s" % BASE_FILE_NAME.split('/')[-1] + '-train' + AFFIX + '.npz')
-#
-#    print ("Writing predicted gaze heatmap (val) into the npz file...")
-#    np.savez_compressed(BASE_FILE_NAME.split('/')[-1] + '-val' + AFFIX, fid=d.val_fid, heatmap=val_pred)
-#    print ("Done. Output is:")
-#    print (" %s" % BASE_FILE_NAME.split('/')[-1] + '-val' + AFFIX + '.npz')
+    print ("Writing predicted gaze heatmap (train) into the npz file...")
+    for i in range(train_pred.shape[0]):
+        np.savez('G:/Research2/w6/aaa/42_pKf_dp0.1_k3s1/1/agil_prediction%d' %i, heatmap=train_pred[i])
+    print ("Saved")
+
+
+#%%
+import matplotlib.pyplot as plt
+import heatmap_generation
+a=np.load('G:/Research2/w6/aaa/44_pKf_dp0.3_k3s1/1/agil_prediction50.npz')['heatmap']
+a=np.reshape(a,(a.shape[0], a.shape[1]))
+heatmap_object = heatmap_generation.heatmap(1024, 576)
+a = heatmap_object.normalize(a)
+plt.imshow(a)
+
+    
+
