@@ -23,28 +23,31 @@ class read_data:
         frame_sets = [x for x in os.listdir(self.dir_to_save_frames_in_use) if x.endswith('.jpg')]
         training_data = np.empty((100, self.height, self.width, 3))
         count = 0
-        for frame in frame_sets:
-            index = int(frame.strip('frame').strip('_y.jpg'))   # Get loaded frame index
-            if index <= 4339:
-                img = cv2.imread(self.dir_to_save_frames_in_use + frame)   # Load the frame to visualize
+        for i in range(len(frame_sets)):
+            # Load 100 frames
+            if i < 100:
+                img = cv2.imread(self.dir_to_save_frames_in_use + frame_sets[i])   
                 training_data[count] = img
                 count += 1
                 
         # Load ground truth heatmaps as labels
-        truth_heatmap_sets = [x for x in os.listdir(self.dir_ground_truth_heatmap) if x.endswith('.jpg')]  
-        training_labels = np.empty((100, self.height, self.width, 3))
+        truth_heatmap_sets = [x for x in os.listdir(self.dir_ground_truth_heatmap) if x.endswith('.npz')]  
+        training_labels = np.empty((100, self.height, self.width))
+        heatmap_object = heatmap_generation.heatmap(1024, 576)
         count = 0
-        for heatmap in truth_heatmap_sets:
-            index = int(heatmap.strip('frame').strip('.jpg'))   # Get loaded frame index
-            if index <= 4339:
-                img = cv2.imread(self.dir_ground_truth_heatmap + frame)   # Load the frame to visualize
-                training_labels[count, :, :, :] = img
+        for j in range(len(truth_heatmap_sets)):
+            # Load 100 labels
+            if j < 100:
+                img = np.load(self.dir_ground_truth_heatmap + truth_heatmap_sets[j])['heatmap']   
+                img = heatmap_object.normalize(img)   # heatmap normalization
+                training_labels[count] = img
                 count += 1
+                
+        # Reshape input labels (heatmaps)
+        training_labels = np.reshape(training_labels, (training_labels.shape[0], 576, 1024, 1))
         # Whitening
         training_data = (training_data - np.mean(training_data)) / np.std(training_data)
-        heatmap_object = heatmap_generation.heatmap(1024, 576)
-        training_labels = heatmap_object.normalize(training_labels)
         
         return training_data, training_labels
-
+    
 
