@@ -1,6 +1,6 @@
 # Walking_Gaze_Modeling
 
-To extract frames from the video, use _jon_data_2_frames.py_, _check_dirs.py_
+To extract frames from the video, use _jon_data_2_frames.py_ (_check_dirs.py_)
 
 To generate groundtruth frames and videos for validation and groundtruth heatmap, use _validation.py_
 
