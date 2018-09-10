@@ -2,7 +2,7 @@
 
 To extract frames from the video, use _jon_data_2_frames.py_ (_check_dirs.py_)
 
-To generate groundtruth frames and videos for validation and groundtruth heatmap, use _validation.py_
+To generate groundtruth frames and videos for validation and groundtruth heatmap, use _validation.py_ (_config.py, video.py, heatmap.py, check_dirs.py_)
 
 Base line model(Itti, chance, anti_saliency): _main.py_
 
