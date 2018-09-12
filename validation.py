@@ -33,6 +33,13 @@ if __name__ == '__main__':
     frame_sets = [x for x in os.listdir(config.dir_to_load_frames) if x.endswith('.jpg')]   # Load frames   
     print('Number of frames:', len(frame_sets))
     
+    # Sort file name by frame index
+    for i in range(len(frame_sets)):
+        frame_sets[i] = int(frame_sets[i].strip('frame').strip('.jpg'))
+    frame_sets.sort()
+    for i in range(len(frame_sets)):
+        frame_sets[i] = 'frame' + str(frame_sets[i]) + '.jpg'   
+    
     for frame in frame_sets:
         index = int(frame.strip('frame').strip('.jpg'))   # Get loaded frame index
         # Frames to test
