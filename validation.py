@@ -67,7 +67,7 @@ if __name__ == '__main__':
                                                   heatmap_object.generate_Gaussian_map(center[0], center[1], 
 											config.variance_x, config.variance_y)))
                     # Plot a red circle on frame
-                    cv2.circle(img, center, radius=10, color=(0,0,255), 
+                    cv2.circle(img, center, radius=5, color=(0,0,255), 
                                              thickness=2, lineType=8, shift=0)
             # Save plotted frames
             cv2.imwrite(config.dir_to_save_groundtruth + 'frame%s.jpg' % index, img)   
