@@ -13,11 +13,11 @@ import check_dirs
 print('OpenCV version: ', cv2.__version__)
 
 dir_to_load_video = './'
-dir_to_save_frames = './frames/'
+dir_to_save_frames = './frames1/'
 check_dirs.check_dir(dir_to_save_frames)
-pixel = {'x': 1024, 'y': 576}   # Target size
+pixel = {'x': 320, 'y': 240}   # Target size
 
-cap = cv2.VideoCapture(dir_to_load_video + 'world.mp4')   #Obtain video
+cap = cv2.VideoCapture(dir_to_load_video + 'world1.mp4')   #Obtain video
 ret, frame = cap.read()   #Capture each frame
 
 count = 0

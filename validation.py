@@ -20,7 +20,7 @@ if __name__ == '__main__':
     check_dirs.check_dir(config.dir_to_save_groundtruth)
     check_dirs.check_dir(config.dir_to_save_heatmap)
     check_dirs.check_dir(config.dir_write_video)
-    groundtruth_log = open(config.dir_to_save_log +"/log.txt", 'w')
+    groundtruth_log = open(config.dir_to_save_groundtruth_log +"/log.txt", 'w')
     
     '''Import groundtruth coordinates and frame indeces from csv'''
     truth_df = pd.read_csv(config.groudtruth_file)
@@ -32,13 +32,13 @@ if __name__ == '__main__':
     '''Generate and save groundtruth frames/heatmap/txt'''
     frame_sets = [x for x in os.listdir(config.dir_to_load_frames) if x.endswith('.jpg')]   # Load frames   
     print('Number of frames:', len(frame_sets))
-    
+
     # Sort file name by frame index
     for i in range(len(frame_sets)):
         frame_sets[i] = int(frame_sets[i].strip('frame').strip('.jpg'))
     frame_sets.sort()
     for i in range(len(frame_sets)):
-        frame_sets[i] = 'frame' + str(frame_sets[i]) + '.jpg'   
+	frame_sets[i] = 'frame' + str(frame_sets[i]) + '.jpg' 
     
     for frame in frame_sets:
         index = int(frame.strip('frame').strip('.jpg'))   # Get loaded frame index
@@ -64,7 +64,8 @@ if __name__ == '__main__':
                     groundtruth_log.write(' ' + str(center[0]) + ' ' + str(center[1]))   
                     # Update Gaussian map
                     raw_Gaussian_map = np.dstack((raw_Gaussian_map,
-                                                  heatmap_object.generate_Gaussian_map(center[0], center[1], config.variance)))
+                                                  heatmap_object.generate_Gaussian_map(center[0], center[1], 
+											config.variance_x, config.variance_y)))
                     # Plot a red circle on frame
                     cv2.circle(img, center, radius=10, color=(0,0,255), 
                                              thickness=2, lineType=8, shift=0)
