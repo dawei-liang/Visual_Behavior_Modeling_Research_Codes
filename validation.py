@@ -20,7 +20,7 @@ if __name__ == '__main__':
     check_dirs.check_dir(config.dir_to_save_groundtruth)
     check_dirs.check_dir(config.dir_to_save_heatmap)
     check_dirs.check_dir(config.dir_write_video)
-    groundtruth_log = open(config.dir_to_save_groundtruth_log +"/log.txt", 'w')
+    groundtruth_log = open(config.dir_to_save_groundtruth_log +"/log1.txt", 'w')
     
     '''Import groundtruth coordinates and frame indeces from csv'''
     truth_df = pd.read_csv(config.groudtruth_file)
