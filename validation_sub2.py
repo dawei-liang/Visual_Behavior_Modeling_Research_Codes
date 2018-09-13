@@ -24,7 +24,7 @@ if __name__ == '__main__':
     groundtruth_log = open(config.dir_to_save_log +"/log2.txt", 'w')
     
     '''Import groundtruth coordinates and frame indeces from csv'''
-    matfn = 'G:/Research2/sem2 w1/Walking_data_Subj1and2/Subj2/por.mat'
+    matfn = config.groudtruth_file_sub2
     data=sio.loadmat(matfn)
     norm_pos_x = data['porX'] * 1.0 / 1920
     norm_pos_y = data['porY'] * 1.0 / 1080
