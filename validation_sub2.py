@@ -56,8 +56,8 @@ if __name__ == '__main__':
             raw_Gaussian_map = np.zeros((config.pixel['y'], config.pixel['x']))   # Set heatmap size
             
             # Loop for all frames, one gaze pair/frame     
-            center = (int(norm_pos_x[i] * config.pixel['x']), 
-                      int(config.pixel['y'] - norm_pos_y[i] * config.pixel['y']))   # Gaze points, x:right;y:down
+            center = (int(norm_pos_x[index] * config.pixel['x']), 
+                      int(config.pixel['y'] - norm_pos_y[index] * config.pixel['y']))   # Gaze points, x:right;y:down
             # Write groundtruth to txt
             groundtruth_log.write(' ' + str(center[0]) + ' ' + str(center[1]))   
             # Update Gaussian map
