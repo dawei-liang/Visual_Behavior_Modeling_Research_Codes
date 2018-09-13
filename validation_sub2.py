@@ -62,7 +62,8 @@ if __name__ == '__main__':
             groundtruth_log.write(' ' + str(center[0]) + ' ' + str(center[1]))   
             # Update Gaussian map
             raw_Gaussian_map = np.dstack((raw_Gaussian_map,
-                                          heatmap_object.generate_Gaussian_map(center[0], center[1], config.variance)))
+                                          heatmap_object.generate_Gaussian_map(center[0], center[1], 
+                                                                              config.variance_x, config.variance_y)))
             # Plot a red circle on frame
             cv2.circle(img, center, radius=5, color=(0,0,255), 
                                      thickness=2, lineType=8, shift=0)
