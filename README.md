@@ -9,6 +9,4 @@ To generate ground truth marked frames, gaze log file and video for validation a
 
 Base line model(Itti, chance, anti_saliency): _main.py_
 
-Parameters: _config.py_
-
 To replay predictions: _replay_video.py_
