@@ -24,6 +24,6 @@ variance_x = 3.055
 variance_y = 4.073
 
 groudtruth_file = './gaze_positions.csv'
-
+groudtruth_file_sub2 = './por.mat'
 
 
