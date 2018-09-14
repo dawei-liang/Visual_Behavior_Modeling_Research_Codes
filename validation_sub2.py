@@ -24,7 +24,7 @@ if __name__ == '__main__':
     groundtruth_log = open(config.dir_to_save_groundtruth_log +"/log2.txt", 'w')
     
     '''Import groundtruth coordinates and frame indeces from csv'''
-    matfn = config.groudtruth_file_sub2
+    matfn = 'G:/Research2/sem2 w1/Walking_data_Subj1and2/Subj2/por.mat'
     data=sio.loadmat(matfn)
     norm_pos_x = data['porX'] * 1.0 / 1920
     norm_pos_y = data['porY'] * 1.0 / 1080
@@ -46,10 +46,12 @@ if __name__ == '__main__':
     for frame in frame_sets:
         index = int(frame.strip('frame').strip('.jpg'))   # Get loaded frame index
         # Frames to test
-        if (index >= 2610 and index < 6090) or \
-        (index >= 6480 and index < 9900) or \
-        (index >= 10200 and index < 13650) or \
-        (index >= 15060 and index < 17670):
+        if (index >= 2530 and index < 4361) or \
+        (index >= 4481 and index < 6191) or \
+        (index >= 6445 and index < 8075) or \
+        (index >= 8195 and index < 9960) or \
+        (index >= 10174 and index < 11896) or \
+        (index >= 11950 and index < 13712):
             groundtruth_log.write('\n' + str(index))
             print('frame:', index)               
             img = cv2.imread(config.dir_to_load_frames + frame)   # Load the frame to visualize 
@@ -57,13 +59,13 @@ if __name__ == '__main__':
             
             # Loop for all frames, one gaze pair/frame     
             center = (int(norm_pos_x[index] * config.pixel['x']), 
-                      int(config.pixel['y'] - norm_pos_y[index] * config.pixel['y']))   # Gaze points, x:right;y:down
+                      int(norm_pos_y[index] * config.pixel['y']))   # Gaze points, x:right;y:down
             # Write groundtruth to txt
             groundtruth_log.write(' ' + str(center[0]) + ' ' + str(center[1]))   
             # Update Gaussian map
             raw_Gaussian_map = np.dstack((raw_Gaussian_map,
-                                          heatmap_object.generate_Gaussian_map(center[0], center[1], 
-                                                                              config.variance_x, config.variance_y)))
+                                          heatmap_object.generate_Gaussian_map(center[0], center[1],
+                                                                               config.variance_x, config.variance_y)))
             # Plot a red circle on frame
             cv2.circle(img, center, radius=5, color=(0,0,255), 
                                      thickness=2, lineType=8, shift=0)
@@ -79,6 +81,4 @@ if __name__ == '__main__':
     ''' Generate a groundtruth video '''
     video_object = video.video(config.dir_to_load_frames_for_video, config.dir_write_video)
     video_object.to_video()
-
-#%%
 
