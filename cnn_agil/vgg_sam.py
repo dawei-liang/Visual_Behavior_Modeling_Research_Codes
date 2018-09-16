@@ -57,7 +57,38 @@ def dcn_vgg(input_tensor=None):
     x = Convolution2D(512, (3,3), activation='relu', padding='same', name='block5_conv2', dilation_rate=(2,2))(x)
     x = Convolution2D(512, (3,3), activation='relu', padding='same', name='block5_conv3', dilation_rate=(2,2))(x)
     print("conv_5", x.shape)
+    
+    
+    # Deconv
+    deconv12 = Conv2DTranspose(512, (2,2), strides=1, padding='same')
+    x = deconv12(x)
+    print(deconv12.output_shape)
+    x=Activation('relu')(x)
+    x=BatchNormalization()(x)
+    x=Dropout(0.5)(x)
 
+    deconv22 = Conv2DTranspose(256, (2,2), strides=2, padding='same')
+    x = deconv22(x)
+    print(deconv22.output_shape)
+    x=Activation('relu')(x)
+    x=BatchNormalization()(x)
+    x=Dropout(0.5)(x)
+    
+    deconv23 = Conv2DTranspose(128, (2,2), strides=2, padding='same')
+    x = deconv23(x)
+    print(deconv23.output_shape)
+    x=Activation('relu')(x)
+    x=BatchNormalization()(x)
+    x=Dropout(0.5)(x)
+    
+    deconv24 = Conv2DTranspose(1, (2,2), strides=2, padding='same')
+    x = deconv24(x)
+    print(deconv24.output_shape)
+    x=Activation('relu')(x)
+    x=BatchNormalization()(x)
+    x=Dropout(0.5)(x)
+
+    
     # Create model
     model = Model(img_input, x)
 
