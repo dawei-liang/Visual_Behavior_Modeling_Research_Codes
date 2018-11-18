@@ -5,7 +5,7 @@ To extract frames from the video, use _jon_data_2_frames.py_ (_check_dirs.py_)
 To obtain frames in use: _label_useful_frames.py_ (_config.py, check_dirs.py_)
 
 To generate ground truth marked frames, gaze log file and video for validation and to generate ground truth heatmap for training/testing, use _validation.py_ (_config.py, video.py, heatmap.py, check_dirs.py_)
-(the data of subject 2 was stored in mat format, please use _validation_sub2.py_ instead)
+(subject 2: _validation_sub2.py_; sub3:  _validation_sub3.py_)
 
 To flip img/heatmap/ground truth: _flip_img.py_(_check_dirs.py, config.py_)
 
