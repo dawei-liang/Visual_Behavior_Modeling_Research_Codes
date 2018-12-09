@@ -35,12 +35,12 @@ validation_BATCH_SIZE = 50
 num_epoch = 20
 
 resume_model = False
-predict_mode = True
+predict_mode = False
 compress_channel_1=True   # Whether to stack and save img by every 2 channels first (sub 1)
 compress_channel_2 = True 
 compress_channel_3 = True   
 
-save_index = '55'   # File index to load the well-trained model and save predictions
+save_index = '61'   # File index to load the well-trained model and save predictions
 dropout = 0.5
 k = 3   # input img channels
 stride = 1
@@ -70,36 +70,36 @@ else:
     x=x_inputs #inputs is used by the line "Model(inputs, ... )" below
 
     # conv_1
-    x = L.Conv2D(32, (8,8), strides=4, activation='relu', padding='same', data_format="channels_last", name='block1_conv1')(x)
+    x = L.Conv2D(32, (4,4), strides=4, activation='relu', padding='valid', data_format="channels_last", name='block1_conv1')(x)
     x = L.BatchNormalization()(x)
     x = L.Dropout(dropout)(x)
     print("conv_1_1", x.shape)
-    x = L.Conv2D(64, (4,4), strides=2, activation='relu', padding='same', data_format="channels_last", name='block1_conv2')(x)
+    x = L.Conv2D(64, (4,4), strides=2, activation='relu', padding='valid', data_format="channels_last", name='block1_conv2')(x)
     x = L.BatchNormalization()(x)
     x = L.Dropout(dropout)(x)
     print("conv_1_2", x.shape)
 
     # conv_2
-    x = L.Conv2D(64, (3,3), strides=1, activation='relu', padding='same', data_format="channels_last", name='block2_conv1')(x)
+    x = L.Conv2D(64, (3,3), strides=1, activation='relu', padding='valid', data_format="channels_last", name='block2_conv1')(x)
     x = L.BatchNormalization()(x)
     x = L.Dropout(dropout)(x)
     print("conv_2", x.shape)
     
     # deconv
-    deconv1 = L.Conv2DTranspose(64, (3,3), strides=1, padding='same')
+    deconv1 = L.Conv2DTranspose(64, (3,3), strides=1, padding='valid')
     x = deconv1(x)
     print("deconv_1", deconv1.output_shape)
     x = L.Activation('relu')(x)
     x = L.BatchNormalization()(x)
     x = L.Dropout(dropout)(x)
  
-    deconv2 = L.Conv2DTranspose(32, (4,4), strides=2, padding='same')
+    deconv2 = L.Conv2DTranspose(32, (4,4), strides=2, padding='valid')
     x = deconv2(x)
     print("deconv_2", deconv2.output_shape)
     x = L.Activation('relu')(x)
     x = L.BatchNormalization()(x)
     x = L.Dropout(dropout)(x) 
-    deconv3 = L.Conv2DTranspose(1, (8,8), strides=4, padding='same')
+    deconv3 = L.Conv2DTranspose(1, (4,4), strides=4, padding='valid')
     x = deconv3(x)
     print ("deconv_3", deconv3.output_shape)
     x = L.Activation('relu')(x)
@@ -235,8 +235,9 @@ if not predict_mode:
 
 # if prediction mode
 elif predict_mode:
+    target = 'sub2'   # 'subx'
     rootdir = './result_sem2/' + str(save_index) + '_agil_dp0.5_batch'+ str(BATCH_SIZE) + '_chan'+ str(k) + '_stride1/'
-    model.load_weights(rootdir +'weights.18-3.82.hdf5')
+    model.load_weights(rootdir +'weights.17-3.78.hdf5')
 
     #print ("Evaluating model...")
     #score = model.evaluate(test_data, test_labels, BATCH_SIZE, 0)
@@ -256,13 +257,16 @@ elif predict_mode:
     print ("Copying truth frames...")
 
     training_data = 0
-    if not os.path.exists(rootdir + 'prediction/sub1/'):   # File for prediction
-        os.makedirs(rootdir + 'prediction/sub1/')
-    if not os.path.exists(rootdir + 'prediction/groundtruth_frames_sub1/'):   # File for raw groundtruth frames
-        os.makedirs(rootdir + 'prediction/groundtruth_frames_sub1/')
+    test_data = 0   # Release memory
 
-    #truth_dir = '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_groundtruth_1/'
-    truth_dir = '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_1/'
+    if not os.path.exists(rootdir + 'prediction/' + target + '/'):   # File for prediction
+        os.makedirs(rootdir + 'prediction/' + target + '/')
+    if not os.path.exists(rootdir + 'prediction/groundtruth_frames_' + target + '/'):   # File for raw groundtruth frames
+        os.makedirs(rootdir + 'prediction/groundtruth_frames_' + target + '/')
+
+    # Copy ground truth frames for video visualization
+    truth_dir = '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_groundtruth_' + target[-1] + '/'   
+    #truth_dir = '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_1/'
     truth_sets = [x for x in os.listdir(truth_dir) if x.endswith('.jpg')]
     # Sort file name by frame index
     for i in range(len(truth_sets)):
@@ -273,16 +277,16 @@ elif predict_mode:
 
     # Save truth frames
     for i in range(len(truth_sets)):
-          if i >= 0:
+          if i >= 3800:
               frame_idx = int(truth_sets[i].strip('frame').strip('.jpg'))
               img = cv2.imread(truth_dir + truth_sets[i])
-              cv2.imwrite(rootdir + 'prediction/groundtruth_frames_sub1/' + 'frame%s.jpg' % frame_idx, img)
+              cv2.imwrite(rootdir + 'prediction/groundtruth_frames_' + target + '/' + 'frame%s.jpg' % frame_idx, img)
 
     # Predict
     print ("Predicting test results...")
-    pred = model.predict(sub1_data, BATCH_SIZE)   
-    test_data = 0
+    test_data = (sub2_data - mean) / std   # Standardization
+    pred = model.predict(test_data[3800:], BATCH_SIZE) 
     for i in range(pred.shape[0]):
-        np.savez(rootdir + 'prediction/sub1/' + 'prediction%d' %i, heatmap=pred[i])
+        np.savez(rootdir + 'prediction/' + target + '/' + 'prediction%d' %i, heatmap=pred[i])
 
     print ("Predicted and saved(test).") 
