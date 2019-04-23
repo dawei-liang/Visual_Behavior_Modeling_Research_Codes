@@ -19,8 +19,8 @@ def frameInfo(matfile, subject):
     
     subFrames = []
     test_idx = []
-    assert len(frameNumbers) == len(subjKey), print('subject key size is different from frame size, please check mat file!')
-    assert len(walkKey) == len(subjKey), print('subject key size is different from walkkey size, please check mat file!')
+    assert len(frameNumbers) == len(subjKey), 'subject key size is different from frame size, please check mat file!'
+    assert len(walkKey) == len(subjKey), 'subject key size is different from walkkey size, please check mat file!'
     
     for key in range(len(subjKey)):
         if subjKey[key] == subject:
