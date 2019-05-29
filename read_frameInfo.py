@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Apr 23 15:05:53 2019
-
 @author: david
 """
 
@@ -26,7 +25,7 @@ def frameInfo(matfile, subject):
         if subjKey[key] == subject:
             subFrames.append(frameNumbers[key])
             if walkKey[key] == 3 or walkKey[key] == 4:   # walkKey 3 and 4 are used for testing
-                test_idx.append(key)
+                test_idx.append(subFrames.index(frameNumbers[key]))   # row # in the subFrames list
     
     # Frame idx for specified subject
     subFrames = np.asarray(subFrames, dtype=int)
@@ -34,4 +33,3 @@ def frameInfo(matfile, subject):
     # test idx
     test_idx_start, test_idx_end = test_idx[0], test_idx[-1]
     return subFrames, test_idx_start, test_idx_end
-
