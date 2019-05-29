@@ -17,8 +17,8 @@ import compress_data
 import cv2
 
 '''Fix random seed'''
-#seed(0)
-#set_random_seed(0)
+seed(0)
+set_random_seed(0)
 
 os.environ['MKL_NUM_THREADS']='272'
 os.environ['GOTO_NUM_THREADS']='272'
@@ -32,19 +32,26 @@ print("Architecture: agil_bianzhong")
 BATCH_SIZE = 64
 validation_size = 200
 validation_BATCH_SIZE = 50
-num_epoch = 20
+num_epoch = 40
 
 resume_model = False
-predict_mode = False
-compress_channel_1=True   # Whether to stack and save img by every 2 channels first (sub 1)
-compress_channel_2 = True 
-compress_channel_3 = True   
+predict_mode = True
+load_sub1=True  
+load_sub2 = True 
+load_sub3 = True   
 
-save_index = '61'   # File index to load the well-trained model and save predictions
+save_index = '71'   # File index to load the well-trained model and save predictions
 dropout = 0.5
 k = 3   # input img channels
 stride = 1
 SHAPE = (120,160,k) # height * width * channel This cannot read from file and needs to be provided here
+
+sub1_data_file = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/crop_images_1/'
+sub1_heatmap_file = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_1/'
+sub2_data_file = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/crop_images_2/'
+sub2_heatmap_file = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_2/'
+sub3_data_file = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/crop_images_3/'
+sub3_heatmap_file = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_3/'
 
 print('predict?', predict_mode)
 
@@ -71,18 +78,18 @@ else:
 
     # conv_1
     x = L.Conv2D(32, (4,4), strides=4, activation='relu', padding='valid', data_format="channels_last", name='block1_conv1')(x)
-    x = L.BatchNormalization()(x)
-    x = L.Dropout(dropout)(x)
+    x = L.BatchNormalization()(x) 
+    #x = L.Dropout(dropout)(x)
     print("conv_1_1", x.shape)
     x = L.Conv2D(64, (4,4), strides=2, activation='relu', padding='valid', data_format="channels_last", name='block1_conv2')(x)
-    x = L.BatchNormalization()(x)
-    x = L.Dropout(dropout)(x)
+    x = L.BatchNormalization()(x)     
+    #x = L.Dropout(dropout)(x)
     print("conv_1_2", x.shape)
 
     # conv_2
     x = L.Conv2D(64, (3,3), strides=1, activation='relu', padding='valid', data_format="channels_last", name='block2_conv1')(x)
     x = L.BatchNormalization()(x)
-    x = L.Dropout(dropout)(x)
+    #x = L.Dropout(dropout)(x)
     print("conv_2", x.shape)
     
     # deconv
@@ -91,14 +98,14 @@ else:
     print("deconv_1", deconv1.output_shape)
     x = L.Activation('relu')(x)
     x = L.BatchNormalization()(x)
-    x = L.Dropout(dropout)(x)
+    #x = L.Dropout(dropout)(x)
  
     deconv2 = L.Conv2DTranspose(32, (4,4), strides=2, padding='valid')
     x = deconv2(x)
     print("deconv_2", deconv2.output_shape)
     x = L.Activation('relu')(x)
     x = L.BatchNormalization()(x)
-    x = L.Dropout(dropout)(x) 
+    #x = L.Dropout(dropout)(x) 
     deconv3 = L.Conv2DTranspose(1, (4,4), strides=4, padding='valid')
     x = deconv3(x)
     print ("deconv_3", deconv3.output_shape)
@@ -119,79 +126,58 @@ else:
         
     model.compile(loss=MU.my_kld, optimizer=opt, metrics=[MU.NSS])
 
-# Load training data and labels(heatmaps) 
+''' Load sub1 data and labels(heatmaps) '''
+if load_sub1:
+    sub1_object = load_data_for_cnn.read_data(sub1_data_file, sub1_heatmap_file, SHAPE[0], SHAPE[1])
 
-if compress_channel_1:
-    training_data_object = load_data_for_cnn.read_data('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_1/',
-                                                   '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_1/',
-                                                   120, 160)
+    sub1_data, sub1_labels, frame_index1, heatmap_index1 = sub1_object.load_data()
+    #sub1_object = load_data_for_cnn.read_data(sub1_data_file, sub1_heatmap_file, SHAPE[0], SHAPE[1])
+    #sub1_data_flip, sub1_labels_flip, frame_index1_flip, heatmap_index1_flip = sub1_object.load_data()
 
-    sub1_data, sub1_labels, frame_index, heatmap_index = training_data_object.load_data()
-    training_data_object2 = load_data_for_cnn.read_data('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_1_flip/',
-                                                   '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_1_flip/',
-                                                   120, 160)
-
-    sub1_data_flip, sub1_labels_flip, frame_index_flip, heatmap_index_flip = training_data_object2.load_data()
-
-    #compress_data.save(k, './dir_to_save_compressed_frames_sub1_k6/', training_data, frame_index)
-
-#training_data = compress_data.load_data(k, './dir_to_save_compressed_frames_sub1_k6/', 120, 160)
-#training_labels = compress_data.load_label('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_1/',
- #                                                  120, 160)
 print('sub1 data loaded, shape:', sub1_data.shape, sub1_labels.shape)
 
-# Load test data and labels(heatmaps) 
-if compress_channel_2:
-    val_data_object = load_data_for_cnn.read_data('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_2/',
-                                                   '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_2/',
-                                                       120, 160) 
-    sub2_data, sub2_labels, frame_index_test, heatmap_index_test = val_data_object.load_data_validation()
-    val_data_object2 = load_data_for_cnn.read_data('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_2_flip/',
-                                                   '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_2_flip/',
-                                                   120, 160)
 
-    sub2_data_flip, sub2_labels_flip, frame_index_test_flip, heatmap_index_test_flip = val_data_object2.load_data_validation()
+''' Load sub2 data and labels(heatmaps) '''
+if load_sub2:
+    sub2_object = load_data_for_cnn.read_data(sub2_data_file, sub2_heatmap_file, SHAPE[0], SHAPE[1]) 
+    sub2_data, sub2_labels, frame_index2, heatmap_index2 = sub2_object.load_data()
+    #sub2_object = load_data_for_cnn.read_data(sub2_data_file, sub2_heatmap_file, SHAPE[0], SHAPE[1])
+    #sub2_data_flip, sub2_labels_flip, frame_index2_flip, heatmap_index2_flip = sub2_object.load_data()
 
-
-#    compress_data.save(k, './dir_to_save_compressed_frames_sub2_k6/', test_data, frame_index_test)
-
-#test_data = compress_data.load_data(k, './dir_to_save_compressed_frames_sub2_k6/', 120, 160)
-#test_labels = compress_data.load_label('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_2/',
- #                                                  120, 160)
 print('sub2 data loaded, shape:', sub2_data.shape, sub2_labels.shape)
 
 
-# Load sub3 data and labels(heatmaps) 
-if compress_channel_3:
-    test_data_object = load_data_for_cnn.read_data('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_3/',
-                                                   '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_3/',
-                                                       120, 160) 
-    sub3_data, sub3_labels, frame_index_val, heatmap_index_val = test_data_object.load_data_test()
-    test_data_object2 = load_data_for_cnn.read_data('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_3_flip/',
-                                                   '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_3_flip/',
-                                                   120, 160)
+''' Load sub3 data and labels(heatmaps) '''
+if load_sub3:
+    sub3_object = load_data_for_cnn.read_data(sub3_data_file, sub3_heatmap_file, SHAPE[0], SHAPE[1]) 
+    sub3_data, sub3_labels, frame_index3, heatmap_index3 = sub3_object.load_data()
+    #sub3_object = load_data_for_cnn.read_data(sub3_data_file, sub3_heatmap_file, SHAPE[0], SHAPE[1])
+    #sub3_data_flip, sub3_labels_flip, frame_index3_flip, heatmap_index3_flip = sub3_object.load_data()
 
-    sub3_data_flip, sub3_labels_flip, frame_index_val_flip, heatmap_index_val_flip = test_data_object2.load_data_test()
-
-#    compress_data.save(k, './dir_to_save_compressed_frames_sub3_k12/', test_data, frame_index_test)
-
-#val_data = compress_data.load_data(k, './dir_to_save_compressed_frames_sub3_k12/', 120, 160)
-#val_labels = compress_data.load_label('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/groundtruth_heatmap_3/',
-#                                                   120, 160)
 print('sub3 data loaded, shape:', sub3_data.shape, sub3_labels.shape)
 
-# Combine subject data and labels
-training_data, training_labels = np.vstack((sub1_data[0:3300], sub2_data[0:3800])), np.vstack((sub1_labels[0:3300], sub2_labels[0:3800]))
-training_data, training_labels = np.vstack((training_data, sub3_data[0:3500])), np.vstack((training_labels, sub3_labels[0:3500]))
+# Import test idx, middle 1/3 of each subject is used for testing
+test_idx_start_sub1, test_idx_end_sub1 = int(round(len(sub1_data)/3.0)), int(round(len(sub1_data)/3.0*2.0))
+test_idx_start_sub2, test_idx_end_sub2 = int(round(len(sub2_data)/3.0)), int(round(len(sub2_data)/3.0*2.0))
+test_idx_start_sub3, test_idx_end_sub3 = int(round(len(sub3_data)/3.0)), int(round(len(sub3_data)/3.0*2.0))
+print('Test row index, sub1:', test_idx_start_sub1, test_idx_end_sub1)
+print('Test row index, sub2:', test_idx_start_sub2, test_idx_end_sub2)
+print('Test row index, sub3:', test_idx_start_sub3, test_idx_end_sub3)
 
-training_data, training_labels = np.vstack((training_data, sub1_data_flip[0:3300])), np.vstack((training_labels, sub1_labels_flip[0:3300]))
-training_data, training_labels = np.vstack((training_data, sub2_data_flip[0:3800])), np.vstack((training_labels, sub2_labels_flip[0:3800]))
-training_data, training_labels = np.vstack((training_data, sub3_data_flip[0:3500])), np.vstack((training_labels, sub3_labels_flip[0:3500]))
+# Combine subject data and labels
+# Sub1
+training_data, training_labels = np.vstack((sub1_data[0:test_idx_start_sub1], sub1_data[test_idx_end_sub1:])), np.vstack((sub1_labels[0:test_idx_start_sub1], sub1_labels[test_idx_end_sub1:]))
+# Sub2
+training_data, training_labels = np.vstack((training_data, sub2_data[0:test_idx_start_sub2])), np.vstack((training_labels, sub2_labels[0:test_idx_start_sub2]))
+training_data, training_labels = np.vstack((training_data, sub2_data[test_idx_end_sub2:])), np.vstack((training_labels, sub2_labels[test_idx_end_sub2:]))
+# Sub3
+training_data, training_labels = np.vstack((training_data, sub3_data[0:test_idx_start_sub3])), np.vstack((training_labels, sub3_labels[0:test_idx_start_sub3]))
+training_data, training_labels = np.vstack((training_data, sub3_data[test_idx_end_sub3:])), np.vstack((training_labels, sub3_labels[test_idx_end_sub3:]))
 print('training set size:', training_data.shape, training_labels.shape)
 
-test_data, test_labels = np.vstack((sub1_data[3300:], sub2_data[3800:])), np.vstack((sub1_labels[3300:], sub2_labels[3800:]))
-test_data, test_labels = np.vstack((test_data, sub3_data[3500:])), np.vstack((test_labels, sub3_labels[3500:]))
-
+# Form test set
+test_data, test_labels = np.vstack((sub1_data[test_idx_start_sub1:test_idx_end_sub1], sub2_data[test_idx_start_sub2:test_idx_end_sub2])), np.vstack((sub1_labels[test_idx_start_sub1:test_idx_end_sub1], sub2_labels[test_idx_start_sub2:test_idx_end_sub2]))
+test_data, test_labels = np.vstack((test_data, sub3_data[test_idx_start_sub3:test_idx_end_sub3])), np.vstack((test_labels, sub3_labels[test_idx_start_sub3:test_idx_end_sub3]))
 print('test set size:', test_data.shape, test_labels.shape)
 
 #std
@@ -204,12 +190,8 @@ test_data = (test_data - mean) / std
 if not predict_mode: 
 
     # if training mode, save model and source codes
-    expr.dump_src_code_and_model_def('/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/cnn/vgg_dec.py', model)
-    
-    #training_data_object.load_data(BATCH_SIZE = BATCH_SIZE, 
-    #                               validation_size=validation_size,
-    #                               validation_BATCH_SIZE=validation_BATCH_SIZE)
-    # 
+    expr.dump_src_code_and_model_def('/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/cnn/agil_raw_64.py', model)
+
     model.fit(training_data, training_labels, BATCH_SIZE, epochs=num_epoch,
         validation_data=(test_data, test_labels),
         shuffle=True, verbose=2,
@@ -218,30 +200,18 @@ if not predict_mode:
             K.callbacks.ModelCheckpoint(expr.dir+"/weights.{epoch:02d}-{val_loss:.2f}.hdf5", monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1),
             base_misc_utils.PrintLrCallback()])
 
-   
-    #model.fit_generator(training_data_object.batch_input(mode='training'), 
-    #        steps_per_epoch=15,
-    #        epochs=num_epoch,
-    #        verbose=2,
-    #        callbacks=[K.callbacks.TensorBoard(log_dir=expr.dir),
-    #                   K.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=num_epoch, min_lr = 0.00001),
-    #                   base_misc_utils.PrintLrCallback()], use_multiprocessing=True, shuffle=True)
-            #validation_data = training_data_object.batch_input(mode='validation'),
-            #validation_steps = 3)
-
     expr.save_weight_and_training_config_state(model)
     expr.printdebug('Successfully saved')
     expr.logfile.close()
 
 # if prediction mode
 elif predict_mode:
-    target = 'sub2'   # 'subx'
+    target = 'sub3'   # 'subx'
+    data_to_test = sub3_data
+    test_head, test_tail = test_idx_start_sub3, test_idx_end_sub3
+    frame_index, heatmap_index = frame_index3, heatmap_index3
     rootdir = './result_sem2/' + str(save_index) + '_agil_dp0.5_batch'+ str(BATCH_SIZE) + '_chan'+ str(k) + '_stride1/'
-    model.load_weights(rootdir +'weights.17-3.78.hdf5')
-
-    #print ("Evaluating model...")
-    #score = model.evaluate(test_data, test_labels, BATCH_SIZE, 0)
-    #print ("Test score is: " , score)
+    model.load_weights(rootdir +'weights.05-3.88.hdf5')  # 120*160:weights.03-3.67 ; 80*105:weights.04-4.00; 100*130:weights.05-3.88 ; 60*80:weights.06-4.15 ; 30*40:weights.05-4.25
 
     '''
     print ("Predicting training results...")
@@ -265,8 +235,7 @@ elif predict_mode:
         os.makedirs(rootdir + 'prediction/groundtruth_frames_' + target + '/')
 
     # Copy ground truth frames for video visualization
-    truth_dir = '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_groundtruth_' + target[-1] + '/'   
-    #truth_dir = '/home1/05563/dl33629/WORK_maverick/gaze_prediction/Walking_Gaze_Modeling/frames_in_use_1/'
+    truth_dir = '/home1/05563/dl33629/WORK_stampede/gaze_prediction/Walking_Gaze_Modeling/frames_groundtruth_' + target[-1] + '/'   
     truth_sets = [x for x in os.listdir(truth_dir) if x.endswith('.jpg')]
     # Sort file name by frame index
     for i in range(len(truth_sets)):
@@ -275,18 +244,21 @@ elif predict_mode:
     for i in range(len(truth_sets)):
          truth_sets[i] = 'frame' + str(truth_sets[i]) + '.jpg'
 
-    # Save truth frames
+    # Save truth frames, frame_index, data_to_test and truth_sets should align with each other exactly.
+    print('Check if size of frame_index and data_to_test is the same:', len(frame_index), len(data_to_test))
+    print('Check if an element of frame_index aligns with truth_sets:', frame_index[test_tail], truth_sets[test_tail])
+    # Write truth frames
     for i in range(len(truth_sets)):
-          if i >= 3800:
-              frame_idx = int(truth_sets[i].strip('frame').strip('.jpg'))
+          frame_idx = int(truth_sets[i].strip('frame').strip('.jpg'))
+          if i >= test_head and i < test_tail:
               img = cv2.imread(truth_dir + truth_sets[i])
               cv2.imwrite(rootdir + 'prediction/groundtruth_frames_' + target + '/' + 'frame%s.jpg' % frame_idx, img)
 
     # Predict
     print ("Predicting test results...")
-    test_data = (sub2_data - mean) / std   # Standardization
-    pred = model.predict(test_data[3800:], BATCH_SIZE) 
-    for i in range(pred.shape[0]):
-        np.savez(rootdir + 'prediction/' + target + '/' + 'prediction%d' %i, heatmap=pred[i])
+    data_to_test = (data_to_test - mean) / std   # Standardization
+    pred = model.predict(data_to_test[test_head:test_tail], BATCH_SIZE) 
+    for i in range(len(pred)):
+        np.savez(rootdir + 'prediction/' + target + '/' + 'prediction%d' %frame_index[test_head+i], heatmap=pred[i])
 
     print ("Predicted and saved(test).") 
