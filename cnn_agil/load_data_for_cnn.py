@@ -28,18 +28,15 @@ class read_data:
         for i in range(len(frame_sets)):
              frame_sets[i] = 'frame' + str(frame_sets[i]) + '.jpg'
 
-        training_data = np.empty((4900, self.height, self.width, 3))
-        count = 0
+        framesSize = len(frame_sets)
+        training_data = np.empty((framesSize, self.height, self.width, 3))
         frame_idx_list = []
         for i in range(len(frame_sets)):
-             if i < 4900:
-                 frame_idx = int(frame_sets[i].strip('frame').strip('.jpg'))
-                 frame_idx_list.append(frame_idx)
-                 print('frame:', frame_idx)   # For index check
-                 img = cv2.imread(self.dir_to_save_frames_in_use + frame_sets[i])
-                 training_data[count] = cp.deepcopy(img)
-                 #training_data[count] = (training_data[count] - np.mean(training_data[count])) / np.std(training_data[count])
-                 count += 1
+             frame_idx = int(frame_sets[i].strip('frame').strip('.jpg'))
+             frame_idx_list.append(frame_idx)
+             print('frame:', frame_idx)   # For index check
+             img = cv2.imread(self.dir_to_save_frames_in_use + frame_sets[i])
+             training_data[i] = cp.deepcopy(img)
                 
         # Load ground truth heatmaps as labels
         truth_heatmap_sets = [x for x in os.listdir(self.dir_ground_truth_heatmap) if x.endswith('.npz')]
@@ -50,28 +47,25 @@ class read_data:
         for j in range(len(truth_heatmap_sets)):
              truth_heatmap_sets[j] = 'heatmap' + str(truth_heatmap_sets[j]) + '.npz'
 
-  
-        training_labels = np.empty((4900, self.height, self.width))
+        assert len(frame_sets) == len(truth_heatmap_sets), 'Loaded frame sets and heatmap sets are of different length.'
+        training_labels = np.empty((framesSize, self.height, self.width))
         heatmap_object = heatmap_generation.heatmap(self.width, self.height)
-        count = 0
         heatmap_idx_list = []
         for j in range(len(truth_heatmap_sets)):
-             if j < 4900:
-                heatmap_idx = int(truth_heatmap_sets[j].strip('heatmap').strip('.npz'))
-                heatmap_idx_list.append(heatmap_idx)
-                print('heatmap:', heatmap_idx)   # For index check
-                img2 = np.load(self.dir_ground_truth_heatmap + truth_heatmap_sets[j])['heatmap']   
-                img2 = heatmap_object.normalize(img2)   # heatmap normalization
-                training_labels[count] = cp.deepcopy(img2)
-                count += 1
+            heatmap_idx = int(truth_heatmap_sets[j].strip('heatmap').strip('.npz'))
+            heatmap_idx_list.append(heatmap_idx)
+            print('heatmap:', heatmap_idx)   # For index check
+            img2 = np.load(self.dir_ground_truth_heatmap + truth_heatmap_sets[j])['heatmap']   
+            img2 = heatmap_object.normalize(img2)   # heatmap normalization
+            training_labels[j] = cp.deepcopy(img2)
                 
         # Reshape input labels (heatmaps)
         training_labels = np.reshape(training_labels, (training_labels.shape[0], self.height, self.width, 1))
         
         return training_data, training_labels, frame_idx_list, heatmap_idx_list
     
-
-    def load_data_validation(self):   
+    '''
+    def load_data_sub2(self, framesSize):   
         # Load frames as validation data
         frame_sets = [x for x in os.listdir(self.dir_to_save_frames_in_use) if x.endswith('.jpg')]
         # Sort file name by frame index
@@ -81,11 +75,11 @@ class read_data:
         for i in range(len(frame_sets)):
              frame_sets[i] = 'frame' + str(frame_sets[i]) + '.jpg'
 
-        validation_data = np.empty((5700, self.height, self.width, 3))
+        validation_data = np.empty((framesSize, self.height, self.width, 3))
         count = 0
         frame_idx_list = []
         for i in range(len(frame_sets)):
-             if i < 5700:
+             if i < framesSize:
                  frame_idx = int(frame_sets[i].strip('frame').strip('.jpg'))
                  frame_idx_list.append(frame_idx)
                  print('frame:', frame_idx)   # For index check
@@ -104,12 +98,12 @@ class read_data:
              truth_heatmap_sets[j] = 'heatmap' + str(truth_heatmap_sets[j]) + '.npz'
 
   
-        validation_labels = np.empty((5700, self.height, self.width))
+        validation_labels = np.empty((5400, self.height, self.width))
         heatmap_object = heatmap_generation.heatmap(self.width, self.height)
         count = 0
         heatmap_idx_list = []
         for j in range(len(truth_heatmap_sets)):
-             if j < 5700:
+             if j < 5400:
              	heatmap_idx = int(truth_heatmap_sets[j].strip('heatmap').strip('.npz'))
                 heatmap_idx_list.append(heatmap_idx)
              	print('heatmap:', heatmap_idx)   # For index check
@@ -124,7 +118,7 @@ class read_data:
         return validation_data, validation_labels, frame_idx_list, heatmap_idx_list
 
 
-    def load_data_test(self):   
+    def load_data_sub3(self):   
         # Load frames as validation data
         frame_sets = [x for x in os.listdir(self.dir_to_save_frames_in_use) if x.endswith('.jpg')]
         # Sort file name by frame index
@@ -134,11 +128,11 @@ class read_data:
         for i in range(len(frame_sets)):
              frame_sets[i] = 'frame' + str(frame_sets[i]) + '.jpg'
 
-        test_data = np.empty((5300, self.height, self.width, 3))
+        test_data = np.empty((3700, self.height, self.width, 3))
         count = 0
         frame_idx_list = []
         for i in range(len(frame_sets)):
-             if i >= 0 and i < 5300:
+             if i >= 0 and i < 3700:
                  frame_idx = int(frame_sets[i].strip('frame').strip('.jpg'))
                  frame_idx_list.append(frame_idx)
                  print('frame:', frame_idx)   # For index check
@@ -157,12 +151,12 @@ class read_data:
              truth_heatmap_sets[j] = 'heatmap' + str(truth_heatmap_sets[j]) + '.npz'
 
   
-        test_labels = np.empty((5300, self.height, self.width))
+        test_labels = np.empty((3700, self.height, self.width))
         heatmap_object = heatmap_generation.heatmap(self.width, self.height)
         count = 0
         heatmap_idx_list = []
         for j in range(len(truth_heatmap_sets)):
-             if j >= 0 and j < 5300:
+             if j >= 0 and j < 3700:
              	heatmap_idx = int(truth_heatmap_sets[j].strip('heatmap').strip('.npz'))
                 heatmap_idx_list.append(heatmap_idx)
              	print('heatmap:', heatmap_idx)   # For index check
@@ -174,6 +168,6 @@ class read_data:
         # Reshape input labels (heatmaps)
         test_labels = np.reshape(test_labels, (test_labels.shape[0], self.height, self.width, 1))
         
-        return test_data, test_labels, frame_idx_list, heatmap_idx_list
+        return test_data, test_labels, frame_idx_list, heatmap_idx_list   '''
     
 
